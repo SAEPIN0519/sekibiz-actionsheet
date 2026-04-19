@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>集客アクションシート</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    background: #f0f4f8;
+    color: #333;
+    padding-bottom: 100px;
+  }
+
+  /* ヘッダー */
+  .header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    padding: 20px 16px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header h1 { font-size: 20px; font-weight: 900; letter-spacing: 1px; }
+  .header .sub { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+
+  /* 進捗バー */
+  .progress-bar {
+    background: rgba(255,255,255,0.2);
+    height: 6px;
+    border-radius: 3px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: #fbbf24;
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 11px;
+    margin-top: 4px;
+    opacity: 0.8;
+  }
+
+  /* ステップナビ */
+  .step-nav {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-x: auto;
+    position: sticky;
+    top: 88px;
+    z-index: 49;
+  }
+  .step-nav-item {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #64748b;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .step-nav-item.active { background: #667eea; color: #fff; }
+  .step-nav-item.done { background: #10b981; color: #fff; }
+
+  /* セクション */
+  .section {
+    margin: 12px 12px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+    display: none;
+  }
+  .section.active { display: block; }
+
+  .section-header {
+    padding: 14px 16px;
+    font-size: 16px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header .badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .badge-work1 { background: #4facfe; }
+  .badge-step1 { background: #3b82f6; }
+  .badge-step2 { background: #f5576c; }
+  .badge-step3 { background: #10b981; }
+  .badge-slide { background: #8b5cf6; }
+  .badge-work3 { background: #f59e0b; }
+
+  .section-body { padding: 0 16px 16px; }
+
+  /* フォーム要素 */
+  .field { margin-bottom: 14px; }
+  .field-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-hint {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 400;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  textarea.large { min-height: 120px; }
+
+  /* プロンプトセクション */
+  .prompt-section {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+  }
+  .prompt-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 8px;
+  }
+  .prompt-text {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  .prompt-text .ph {
+    color: #fbbf24;
+    font-weight: 700;
+  }
+  .btn-copy {
+    width: 100%;
+    background: #667eea;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+  }
+  .btn-copy:active { background: #5a6fd6; }
+  .btn-copy.copied { background: #10b981; }
+
+  .felo-link {
+    display: block;
+    text-align: center;
+    background: #f0fdf4;
+    border: 2px solid #10b981;
+    color: #059669;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-bottom: 14px;
+  }
+
+  /* 書き込み案内 */
+  .write-guide {
+    background: #fffbeb;
+    border: 2px solid #fbbf24;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .write-guide-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #d97706;
+    margin-bottom: 4px;
+  }
+  .write-guide-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #92400e;
+  }
+
+  /* 2列グリッド */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .col-header {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 900;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .col-net { background: #dbeafe; color: #1e40af; }
+  .col-real { background: #fef3c7; color: #92400e; }
+
+  /* 明日やること */
+  .tomorrow-box {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 12px;
+    box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+    display: none;
+  }
+  .tomorrow-box.active { display: block; }
+  .tomorrow-label {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .tomorrow-input {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    font-family: inherit;
+  }
+  .tomorrow-input:focus { outline: 3px solid rgba(255,255,255,0.5); }
+
+  /* 共有ボタン */
+  .share-btn {
+    display: none;
+    margin: 16px 12px 8px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    padding: 18px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 900;
+    width: calc(100% - 24px);
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+  }
+  .share-btn:active { opacity: 0.8; }
+  .share-btn.active { display: block; }
+  .share-btn.sent {
+    background: linear-gradient(135deg, #6b7280, #9ca3af);
+    box-shadow: none;
+  }
+  .share-status {
+    display: none;
+    text-align: center;
+    margin: 0 12px 8px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .share-status.success {
+    display: block;
+    background: #ecfdf5;
+    color: #059669;
+    border: 2px solid #10b981;
+  }
+  .share-status.error {
+    display: block;
+    background: #fef2f2;
+    color: #dc2626;
+    border: 2px solid #f87171;
+  }
+
+  /* 完了ボタン */
+  .complete-btn {
+    display: none;
+    margin: 8px 12px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 900;
+    width: calc(100% - 24px);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .complete-btn.active { display: block; }
+
+  /* 次へボタン */
+  .next-btn {
+    background: #667eea;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+  .next-btn:active { background: #5a6fd6; }
+
+  /* 保存状態 */
+  .save-indicator {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100;
+  }
+  .save-indicator.show { opacity: 1; }
+
+  /* コンセプト診断チェックリスト */
+  .check-category {
+    margin-bottom: 16px;
+  }
+  .check-category-title {
+    font-size: 14px;
+    font-weight: 900;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cat-profile { background: #dbeafe; color: #1e40af; }
+  .cat-content { background: #fce7f3; color: #9d174d; }
+  .cat-導線 { background: #d1fae5; color: #065f46; }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    accent-color: #667eea;
+  }
+  .check-item-text {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* スコア表示 */
+  .score-display {
+    text-align: center;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .score-circle svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg);
+  }
+  .score-circle .score-num {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+    z-index: 1;
+  }
+  .score-circle .score-unit {
+    font-size: 16px;
+    font-weight: 700;
+    opacity: 0.7;
+    z-index: 1;
+  }
+  .score-label {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .score-message {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .score-color-red { color: #dc2626; }
+  .score-color-yellow { color: #d97706; }
+  .score-color-green { color: #059669; }
+  .badge-check { background: #8b5cf6; }
+  .badge-lecture { background: #e11d48; }
+
+  /* 座学セクション */
+  .lecture-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+  }
+  .lecture-card h3 {
+    font-size: 16px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .lecture-card p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #475569;
+  }
+  .lecture-card .emphasis {
+    color: #e11d48;
+    font-weight: 700;
+  }
+  .lecture-card .key-point {
+    background: #fef2f2;
+    border-left: 4px solid #e11d48;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #991b1b;
+    line-height: 1.6;
+  }
+  .lecture-card .good-point {
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .compare-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .compare-bad {
+    background: #fef2f2;
+    border: 2px solid #fca5a5;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .compare-good {
+    background: #ecfdf5;
+    border: 2px solid #6ee7b7;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .compare-label {
+    font-size: 13px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .compare-bad .compare-label { color: #dc2626; }
+  .compare-good .compare-label { color: #059669; }
+  .compare-item {
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 3px 0;
+  }
+
+  .pillar-box {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .pillar {
+    flex: 1;
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .pillar-icon { font-size: 28px; margin-bottom: 6px; }
+  .pillar-title { font-size: 13px; font-weight: 900; margin-bottom: 4px; }
+  .pillar-desc { font-size: 11px; line-height: 1.5; opacity: 0.85; }
+  .pillar-1 { background: #dbeafe; color: #1e40af; }
+  .pillar-2 { background: #fce7f3; color: #9d174d; }
+  .pillar-3 { background: #d1fae5; color: #065f46; }
+
+  .algo-visual {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 16px;
+    color: #fff;
+    margin: 12px 0;
+  }
+  .algo-visual h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fbbf24;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .algo-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .algo-icon { font-size: 20px; flex-shrink: 0; }
+  .algo-arrow { color: #fbbf24; font-weight: 900; flex-shrink: 0; }
+
+  .lecture-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    gap: 10px;
+  }
+  .lecture-page-indicator {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+  .lecture-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .lecture-btn-prev {
+    background: #e2e8f0;
+    color: #475569;
+  }
+  .lecture-btn-next {
+    background: #e11d48;
+    color: #fff;
+  }
+  .lecture-btn:active { opacity: 0.8; }
+  .lecture-slide { display: none; }
+  .lecture-slide.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <h1>集客アクションシート</h1>
+  <div class="sub">4/21（火）AIでつくる「うちの店の集客プラン」</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">ワーク1からスタート！</div>
+</div>
+
+<!-- ステップナビ -->
+<div class="step-nav">
+  <button class="step-nav-item active" onclick="showStep(0)">お店の情報</button>
+  <button class="step-nav-item" onclick="showStep(1)">SNS診断</button>
+  <button class="step-nav-item" onclick="showStep(2)">質問1</button>
+  <button class="step-nav-item" onclick="showStep(3)">質問2</button>
+  <button class="step-nav-item" onclick="showStep(4)">スライド</button>
+  <button class="step-nav-item" onclick="showStep(5)">共有</button>
+</div>
+
+<!-- ===== ワーク1：基本情報 ===== -->
+<div class="section active" id="step0">
+  <div class="section-header">
+    <span class="badge badge-work1">ワーク1</span>
+    うちのお店の基本情報
+  </div>
+  <div class="section-body">
+    <div class="field">
+      <div class="field-label">屋号（お名前）</div>
+      <input type="text" id="name" placeholder="例：〇〇カフェ（山田花子）" oninput="autoSave()">
+    </div>
+    <div class="field">
+      <div class="field-label">業種</div>
+      <input type="text" id="business" placeholder="例：カフェ、美容室、ピラティススタジオ" oninput="autoSave(); updatePrompts()">
+    </div>
+    <div class="field">
+      <div class="field-label">場所</div>
+      <input type="text" id="location" placeholder="例：岐阜県関市" oninput="autoSave(); updatePrompts()">
+    </div>
+    <div class="field">
+      <div class="field-label">営業日・営業時間</div>
+      <input type="text" id="hours" placeholder="例：月〜土 10:00-18:00" oninput="autoSave()">
+    </div>
+    <div class="field">
+      <div class="field-label">忙しい時間帯</div>
+      <input type="text" id="busy" placeholder="例：土曜の午前、平日ランチタイム" oninput="autoSave()">
+    </div>
+    <div class="field">
+      <div class="field-label">暇な時間帯</div>
+      <input type="text" id="slow" placeholder="例：火曜終日、平日15時台" oninput="autoSave()">
+    </div>
+    <div class="field">
+      <div class="field-label">一番の悩み</div>
+      <input type="text" id="problem" placeholder="例：平日の午後にお客さんが来ない" oninput="autoSave(); updatePrompts()">
+    </div>
+
+    <div style="margin-top:4px; padding-top:14px; border-top:1px solid #e2e8f0;">
+      <div class="section-header" style="padding:0 0 10px;">
+        <span class="badge badge-work1">ワーク1</span>
+        今やっている集客の棚卸し
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">使っているSNS</div>
+      <input type="text" id="sns" placeholder="例：Instagram、LINE公式、なし" oninput="autoSave(); updatePrompts()">
+    </div>
+    <div class="field">
+      <div class="field-label">Instagramの投稿頻度</div>
+      <input type="text" id="igFreq" placeholder="例：週1回、月2〜3回、ほぼ放置" oninput="autoSave(); updatePrompts()">
+    </div>
+    <div class="field">
+      <div class="field-label">Instagramで発信しているキーワードや内容</div>
+      <input type="text" id="igContent" placeholder="例：新メニュー紹介、店内写真" oninput="autoSave(); updatePrompts()">
+    </div>
+    <div class="field">
+      <div class="field-label">SNS以外の集客（リアル）</div>
+      <input type="text" id="realMarketing" placeholder="例：チラシ、口コミ、看板、特になし" oninput="autoSave(); updatePrompts()">
+    </div>
+    <div class="field">
+      <div class="field-label">うまくいっていること</div>
+      <input type="text" id="working" placeholder="例：口コミで来る人は多い" oninput="autoSave()">
+    </div>
+    <div class="field">
+      <div class="field-label">困っていること</div>
+      <input type="text" id="notWorking" placeholder="例：Instagramを見て来た人がいない" oninput="autoSave()">
+    </div>
+    <div class="field">
+      <div class="field-label">SNSのプロフィール文 <span class="field-hint">（そのままコピペ）</span></div>
+      <div class="field-hint">Instagramのプロフィール画面を開いて、自己紹介文をそのままコピーして貼ってね。やっていない人は「なし」でOK</div>
+      <textarea id="snsProfile" placeholder="例：岐阜県関市のカフェ☕ 自家焙煎コーヒーとランチ🍽 月〜土 10:00-18:00" oninput="autoSave(); updatePrompts()"></textarea>
+    </div>
+    <div class="field">
+      <div class="field-label">普段どんな写真を投稿している？</div>
+      <div class="field-hint">投稿している写真の内容を言葉で教えてね</div>
+      <textarea id="photoStyle" placeholder="例：料理のアップ写真が多い、店内の全体写真、スタッフの笑顔、あまり写真は載せてない" oninput="autoSave(); updatePrompts()"></textarea>
+    </div>
+    <div class="field">
+      <div class="field-label">お店の雰囲気を一言で言うと？</div>
+      <input type="text" id="atmosphere" placeholder="例：アットホームで落ち着く、おしゃれで非日常感がある、にぎやかで活気がある" oninput="autoSave(); updatePrompts()">
+    </div>
+
+    <div style="margin-top:4px; padding-top:14px; border-top:1px solid #e2e8f0;">
+      <div class="section-header" style="padding:0 0 10px;">
+        <span class="badge badge-work1">ワーク1</span>
+        うちの店のコンセプト
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">うちの店のコンセプトは？</div>
+      <div class="field-hint">お客様にとって、うちの店はどんな存在？何を大切にしている？</div>
+      <textarea id="concept" placeholder="例：仕事帰りにほっと一息つける、地元の人の居場所" oninput="autoSave()"></textarea>
+    </div>
+    <div class="field">
+      <div class="field-label">3ヶ月後、どうなっていたい？</div>
+      <div class="field-hint">お客さんの数、売上、お店の雰囲気、SNSのフォロワーなど</div>
+      <textarea id="goal" placeholder="例：平日午後も3〜4組はいる状態、Instagramフォロワー500人" oninput="autoSave()"></textarea>
+    </div>
+    <button class="next-btn" onclick="showStep(1)">SNS診断へ進む →</button>
+  </div>
+</div>
+
+
+<!-- ===== SNSコンセプト診断 ===== -->
+<div class="section" id="stepCheck">
+  <div class="section-header">
+    <span class="badge badge-check">SNS診断</span>
+    あなたのSNS、コンセプト設計率は？
+  </div>
+  <div class="section-body">
+    <div class="write-guide" style="border-color:#8b5cf6; background:#f5f3ff;">
+      <div class="write-guide-label" style="color:#7c3aed;">今すぐInstagramを開いてチェック！</div>
+      <div class="write-guide-text" style="color:#5b21b6;">
+        自分のプロフィール画面と最近の投稿を見ながら、当てはまるものにチェックしてね。
+      </div>
+    </div>
+
+    <!-- スコア表示 -->
+    <div class="score-display">
+      <div class="score-circle" id="scoreCircle">
+        <svg width="140" height="140">
+          <circle cx="70" cy="70" r="62" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+          <circle cx="70" cy="70" r="62" fill="none" stroke="#8b5cf6" stroke-width="10"
+                  stroke-dasharray="389.6" stroke-dashoffset="389.6" stroke-linecap="round"
+                  id="scoreArc"/>
+        </svg>
+        <div class="score-num" id="scoreNum">0</div>
+        <div class="score-unit">%</div>
+      </div>
+      <div class="score-label" id="scoreLabel">コンセプト設計率</div>
+      <div class="score-message" id="scoreMessage">チェックを始めてね</div>
+    </div>
+
+    <!-- プロフィール -->
+    <div class="check-category">
+      <div class="check-category-title cat-profile">プロフィール（お店の看板）</div>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">お店の名前が入っている</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">何屋さんかひと目でわかる（業種・ジャンル）</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">場所（エリア）が書いてある</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">営業日・営業時間が書いてある</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">予約・問い合わせ方法がある（電話・DM・LINE等）</span>
+      </label>
+    </div>
+
+    <!-- 投稿内容 -->
+    <div class="check-category">
+      <div class="check-category-title cat-content">投稿内容（お店の中身）</div>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">最近10投稿のうち8割以上がお店に関係ある内容</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">投稿テーマが3つ以内に絞れている</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">写真の明るさ・雰囲気にある程度の統一感がある</span>
+      </label>
+    </div>
+
+    <!-- 導線 -->
+    <div class="check-category">
+      <div class="check-category-title cat-導線">導線（お客様への案内板）</div>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">メニューや料金がわかるハイライト・投稿がある</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" class="concept-check" onchange="updateScore()">
+        <span class="check-item-text">アクセス・地図・予約方法への導線がある</span>
+      </label>
+    </div>
+
+    <div class="write-guide" id="scoreSummary" style="display:none;">
+      <div class="write-guide-label" id="scoreSummaryLabel"></div>
+      <div class="write-guide-text" id="scoreSummaryText"></div>
+    </div>
+
+    <button class="next-btn" onclick="showStep(2)">ステップ1へ進む →</button>
+  </div>
+</div>
+
+<!-- ===== ステップ1 ===== -->
+<div class="section" id="step1">
+  <div class="section-header">
+    <span class="badge badge-step1">ステップ1</span>
+    お客様の「1日」を見える化
+  </div>
+  <div class="section-body">
+    <div class="prompt-section">
+      <div class="prompt-label">FELOに貼り付けるプロンプト</div>
+      <div class="prompt-text" id="promptText1"></div>
+      <button class="btn-copy" onclick="copyPrompt(1, this)">このプロンプトをコピー</button>
+    </div>
+    <a href="https://felo.ai" target="_blank" class="felo-link">FELOを開いて貼り付ける →</a>
+    <div class="write-guide">
+      <div class="write-guide-label">回答が出たら</div>
+      <div class="write-guide-text">回答を読んで、次のステップへ進もう（同じチャット画面のまま！）</div>
+    </div>
+    <button class="next-btn" onclick="showStep(3)">ステップ2へ進む →</button>
+  </div>
+</div>
+
+<!-- ===== ステップ2 ===== -->
+<div class="section" id="step2">
+  <div class="section-header">
+    <span class="badge badge-step2">ステップ2</span>
+    来店の流れ＆アクションプラン
+  </div>
+  <div class="section-body">
+    <div class="prompt-section">
+      <div class="prompt-label">FELOに貼り付けるプロンプト（同じチャット画面で続けて！）</div>
+      <div class="prompt-text" id="promptText2"></div>
+      <button class="btn-copy" onclick="copyPrompt(2, this)">このプロンプトをコピー</button>
+    </div>
+    <div class="write-guide">
+      <div class="write-guide-label">2ステップ完了！</div>
+      <div class="write-guide-text">FELOに自分だけの集客プランができたよ。次はスライドを作ろう！</div>
+    </div>
+    <div class="write-guide" style="border-color:#e11d48; background:#fef2f2;">
+      <div class="write-guide-label" style="color:#e11d48;">PCをお持ちでない方へ</div>
+      <div class="write-guide-text" style="color:#991b1b;">
+        FELOの回答画面で回答を長押し→「すべて選択」→「コピー」してね。<br>
+        「PCをお持ちでない方はこちら→共有へ」ステップで貼り付ければ、講師がスライドを作るお手伝いをします！
+      </div>
+    </div>
+    <button class="next-btn" onclick="showStep(4)">スライドを作る →</button>
+    <button class="next-btn" style="background:#e11d48; margin-top:8px;" onclick="showStep(5)">PCをお持ちでない方はこちら → 共有へ</button>
+  </div>
+</div>
+
+<!-- ===== スライド生成 ===== -->
+<div class="section" id="stepSlide">
+  <div class="section-header">
+    <span class="badge badge-slide">スライド</span>
+    FELOでスライドを作ろう
+  </div>
+  <div class="section-body">
+    <div class="write-guide" style="border-color:#8b5cf6; background:#f5f3ff;">
+      <div class="write-guide-label" style="color:#7c3aed;">なぜ別のプロンプト？</div>
+      <div class="write-guide-text" style="color:#5b21b6;">
+        FELOの「AIスライドを生成」は、短くまとまった回答だとうまく動くよ。<br>
+        下のプロンプトをコピーして、<strong>同じチャット画面</strong>に貼り付けてね！
+      </div>
+    </div>
+    <div class="prompt-section">
+      <div class="prompt-label">FELOに貼り付けるプロンプト（同じチャット画面で続けて！）</div>
+      <div class="prompt-text" id="promptTextSlide"></div>
+      <button class="btn-copy" onclick="copyPrompt(3, this)">このプロンプトをコピー</button>
+    </div>
+    <div class="write-guide" style="border-color:#10b981; background:#ecfdf5;">
+      <div class="write-guide-label" style="color:#059669;">回答が出たら</div>
+      <div class="write-guide-text" style="color:#065f46;">
+        回答の下に「AIスライドを生成」ボタンが出るよ。それを押すだけ！
+      </div>
+    </div>
+    <button class="next-btn" onclick="showStep(5)">共有へ進む →</button>
+  </div>
+</div>
+
+<!-- ===== 共有 ===== -->
+<div class="section" id="step5">
+  <div class="section-header">
+    <span class="badge" style="background:#f59e0b;">共有</span>
+    みんなに見せよう！
+  </div>
+  <div class="section-body">
+    <div class="write-guide" style="border-color:#667eea; background:#eff6ff;">
+      <div class="write-guide-label" style="color:#4338ca;">スライドを共有しよう</div>
+      <div class="write-guide-text" style="color:#3730a3;">
+        スライドが作れた人は<strong>リンク</strong>を、<br>
+        作れなかった人は<strong>FELOの回答をコピペ</strong>してね。<br>
+        講師がスライドを作るお手伝いをします！
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">スライドのリンク（作れた人）</div>
+      <input type="text" id="feloLink" placeholder="https://felo.ai/slides/... のリンクを貼り付け" oninput="autoSave()">
+    </div>
+
+    <div class="field">
+      <div class="field-label" style="color:#e11d48;">PCをお持ちでない方はこちら</div>
+      <div class="field-hint">FELOのここまでの回答文をコピーして貼り付けてください。講師がスライドを作成します。</div>
+      <textarea id="feloResponse" style="min-height:120px;" placeholder="FELOの回答をここに貼り付け" oninput="autoSave()"></textarea>
+    </div>
+
+  </div>
+</div>
+
+<!-- 発表テンプレート -->
+<div class="tomorrow-box" id="tomorrowBox" style="background:linear-gradient(135deg, #667eea, #764ba2);">
+  <div class="tomorrow-label" style="font-size:16px;">発表のときはこう話してね（1人5分）</div>
+  <div style="background:rgba(255,255,255,0.15); border-radius:10px; padding:14px; font-size:14px; color:#fff; line-height:2; margin-bottom:12px;">
+    <strong>1.</strong>「<span style="color:#fbbf24;">（店舗名）</span> の <span style="color:#fbbf24;">（名前）</span> です」<br>
+    <strong>2.</strong>「FELOに分析してもらったら、こんなスライドができました」<span style="color:#fbbf24;">→ スクリーンに表示</span><br>
+    <strong>3.</strong>「自分の店を見つめ直して、足りないのは <span style="color:#fbbf24;">（ギャップ）</span> だと気づきました」<br>
+    <strong>4.</strong>「だから明日から <span style="color:#fbbf24;">（具体的な行動）</span> をやります！」
+  </div>
+  <div style="font-size:14px; font-weight:700; color:#fbbf24; text-align:center; margin-bottom:10px;">明日やること 1つ</div>
+  <input type="text" class="tomorrow-input" id="tomorrow" placeholder="講座終了後、最初に取り組むこと" oninput="autoSave()">
+</div>
+
+<!-- 共有ボタン -->
+<button class="share-btn" id="shareBtn" onclick="shareToSheet()">みんなに共有する</button>
+<div class="share-status" id="shareStatus"></div>
+
+<!-- 振り返りフォームボタン -->
+<div id="reflectionArea" style="display:none; margin:20px 12px;">
+  <div style="background:linear-gradient(135deg, #e11d48, #f43f5e); border-radius:12px; padding:20px; text-align:center;">
+    <div style="color:#fff; font-size:18px; font-weight:900; margin-bottom:8px;">発表おつかれさまでした！</div>
+    <div style="color:rgba(255,255,255,0.85); font-size:14px; margin-bottom:16px;">最後に振り返りアンケートに回答してね（約3分）</div>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfGz0tm66r45wrqdjTZowL7Lt1QJeIrxVG71arZ94WhXC6Vig/viewform" target="_blank" style="display:block; background:#fff; color:#e11d48; padding:16px; border-radius:10px; font-size:18px; font-weight:900; text-decoration:none; box-shadow:0 4px 12px rgba(0,0,0,0.15);">振り返りアンケートに回答する</a>
+  </div>
+</div>
+
+<div class="save-indicator" id="saveIndicator">自動保存しました</div>
+
+<script>
+  const STORAGE_KEY = 'sekibiz_0421_sheet';
+  const steps = ['step0', 'stepCheck', 'step1', 'step2', 'stepSlide', 'step5'];
+  const navItems = document.querySelectorAll('.step-nav-item');
+  let currentStep = 0;
+
+  // コンセプト設計率の計算
+  function updateScore() {
+    const checks = document.querySelectorAll('.concept-check');
+    const total = checks.length;
+    const checked = document.querySelectorAll('.concept-check:checked').length;
+    const pct = Math.round((checked / total) * 100);
+
+    // 円グラフ更新
+    const circumference = 389.6;
+    const offset = circumference - (circumference * pct / 100);
+    const arc = document.getElementById('scoreArc');
+    arc.style.strokeDashoffset = offset;
+
+    // 色の変更
+    let color, label, message;
+    if (pct <= 30) {
+      color = '#dc2626';
+      arc.style.stroke = color;
+      label = '今日ここを整えよう！';
+      message = 'プロフィールの基本が足りていないかも。でも大丈夫、今日の講座で一緒に直そう！';
+    } else if (pct <= 60) {
+      color = '#d97706';
+      arc.style.stroke = color;
+      label = 'あと少しで見違える！';
+      message = '基本はできてる。あとは統一感を整えれば、もっとお客さんに届くようになるよ。';
+    } else if (pct <= 90) {
+      color = '#059669';
+      arc.style.stroke = color;
+      label = 'いい感じ！';
+      message = 'コンセプトはだいぶ整ってる。FELOでさらに磨きをかけよう！';
+    } else {
+      color = '#059669';
+      arc.style.stroke = color;
+      label = 'すばらしい！';
+      message = 'コンセプト設計はバッチリ。次は投稿の中身とタイミングを最適化しよう！';
+    }
+
+    document.getElementById('scoreNum').textContent = pct;
+    document.getElementById('scoreNum').style.color = color;
+    document.getElementById('scoreLabel').textContent = label;
+    document.getElementById('scoreMessage').textContent = message;
+
+    // サマリー表示
+    const summary = document.getElementById('scoreSummary');
+    if (checked > 0) {
+      summary.style.display = 'block';
+      const unchecked = [];
+      checks.forEach(cb => {
+        if (!cb.checked) unchecked.push(cb.closest('.check-item').querySelector('.check-item-text').textContent);
+      });
+      if (unchecked.length > 0) {
+        summary.style.borderColor = color;
+        summary.style.background = pct <= 30 ? '#fef2f2' : pct <= 60 ? '#fffbeb' : '#ecfdf5';
+        document.getElementById('scoreSummaryLabel').style.color = color;
+        document.getElementById('scoreSummaryLabel').textContent = `足りない項目（${unchecked.length}つ）`;
+        document.getElementById('scoreSummaryText').innerHTML = unchecked.map(t => '・' + t).join('<br>');
+      } else {
+        summary.style.borderColor = '#059669';
+        summary.style.background = '#ecfdf5';
+        document.getElementById('scoreSummaryLabel').style.color = '#059669';
+        document.getElementById('scoreSummaryLabel').textContent = '全項目クリア！';
+        document.getElementById('scoreSummaryText').textContent = 'コンセプト設計はバッチリ。FELOでさらに深い分析をしよう！';
+      }
+    } else {
+      summary.style.display = 'none';
+    }
+
+    // チェック状態を保存
+    autoSave();
+  }
+
+  // 座学スライド切り替え
+  function showLecture(n) {
+    document.querySelectorAll('.lecture-slide').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('lec' + n);
+    if (target) target.classList.add('active');
+  }
+
+  // プロンプトテンプレート
+  function getPrompt1() {
+    const b = val('business') || '〇〇（例：パン屋、美容室、整体院、カフェ）';
+    const l = val('location') || '〇〇（例：岐阜県関市）';
+    const s = val('sns') || '〇〇（例：Instagram、LINE公式、なし）';
+    const f = val('igFreq') || '〇〇（例：週1回、月2〜3回、ほぼ放置）';
+    const c = val('igContent') || '〇〇（例：新メニュー紹介、店内写真）';
+    const r = val('realMarketing') || '〇〇（例：チラシ、口コミ、看板、特になし）';
+    const p = val('snsProfile') || '（プロフィール文なし）';
+    const ph = val('photoStyle') || '（未記入）';
+    const atm = val('atmosphere') || '（未記入）';
+    return `あなたは地方の小規模店舗専門のマーケティングコンサルタント兼SNSインフルエンサーです。
+「明日から実際に売上が上がる」レベルの具体的な診断と提案をしてください。
+一般論やありきたりな回答は不要です。この店だけに当てはまる分析をしてください。
+
+【私のお店の情報】
+・業種：${b}
+・場所：${l}
+・理想のお客様：〇〇（例：30代共働きの女性、近隣に住む50代主婦）
+・そのお客様の悩み：〇〇（例：夕食の準備が大変、肩こりがひどい）
+
+【今やっている集客】
+・使っているSNS：${s}
+・Instagramの投稿頻度：${f}
+・Instagramで発信しているキーワードや内容：${c}
+・SNS以外の集客（リアル）：${r}
+
+【今のSNSプロフィール文】
+${p}
+
+【今の投稿の写真スタイル】
+${ph}
+
+【お店の雰囲気】
+${atm}
+
+【こう出力してください】
+まず、最も重要な発見を冒頭3行にまとめてください。
+そのあと以下の内容を出してください：
+
+■ ターゲット提案
+・この業種×地域で「最も来店確率が高い層」を3パターン提案（年齢・性別・ライフスタイル別）
+・それぞれが求めているもの（価格？雰囲気？利便性？特別感？）
+
+■ ターゲットの生活リズム
+・理想のお客様の1日のスケジュール（朝・昼・夕・夜の行動と気分）
+・スマホを見る「隙間時間」はいつか
+
+■ SNSアカウント健康診断（プロのインフルエンサー目線で厳しくチェック）
+以下を1つずつ診断して、改善案を具体的に書いてください：
+1. プロフィール文：3秒で「何屋・どこ・行きたい」が伝わるか？
+2. 営業時間・場所・予約方法：お客様が迷わず来店できる導線があるか？
+3. 投稿の世界観：統一感があるか？お店の雰囲気や価格帯が想像できるか？
+4. 投稿内容とコンセプトの一致：お店が大切にしていることが投稿に反映されているか？
+5. 写真の撮り方・見せ方：今の写真スタイルでお店の魅力は伝わるか？どう撮り直すべきか？
+   - この業種で反応が取れる写真の撮り方を3パターン具体的に提案（構図・光・被写体）
+   - 「スマホでこう撮るだけ」レベルの簡単な指示で
+6. 行動喚起（CTA）：投稿を見た人が「予約する」「行く」に繋がる導線があるか？
+7. プロフィール改善案：このまま使えるプロフィール文を1つ提案してください
+
+■ この業種×ターゲットに最適なSNS媒体
+・Instagram / LINE公式 / TikTok / Facebook / Googleマップ / X から優先順位をつけて推奨
+・なぜその媒体が最適か（ターゲットの年齢層・利用率・業種との相性）
+・各媒体で発信すべき内容
+
+■ 今のリアル集客への診断
+
+■ 同じ業種・同じ地域規模で集客に成功している店舗の実例`;
+  }
+
+  function getPrompt2() {
+    const b = val('business') || '〇〇';
+    const l = val('location') || '〇〇';
+    const p = val('problem') || '〇〇（例：平日の午後にお客さんが来ない）';
+    return `あなたは地方の小規模店舗専門のマーケティング戦略家兼集客コンサルタントです。
+先ほどの分析（ターゲット・SNS健康診断）を全て踏まえて、来店までの流れと具体的なアクションプランを提案してください。
+一般論は不要。この店の状況に合わせた提案だけしてください。
+
+【私のお店の情報】
+・業種：${b}
+・場所：${l}
+・一番の悩み：${p}
+
+【条件】
+・お金をかけない（コスト0円）方法だけ
+・特別なスキルがなくても1人でできること
+・ITが苦手でもできること
+・1日の作業時間は最大30分
+
+【こう出力してください】
+まず「この店が明日やるべき最も効果が高い1つのアクション」を冒頭3行で断言してください。
+
+■ 来店までの流れと阻害要因
+| 段階 | お客様の気持ち | 届けるべき情報 | 具体的にやること |
+|------|-------------|-------------|--------------|
+| 知る | | | |
+| 気になる | | | |
+| 比べる・迷う | | | |
+| 行ってみる | | | |
+
+来店を阻害している壁を3つ特定して、それぞれの壊し方を具体的に提案してください。
+
+■ 今すぐ直すこと（プロフィール・導線の修正）
+・プロフィール文の修正案（コピペでそのまま使える完成形）
+・営業時間・場所・予約方法の記載（不足があれば追加文を提案）
+・投稿のハイライト整理（「メニュー」「アクセス」「お客様の声」など）
+
+■ ネット施策（SNS・Web）
+【明日やること】
+・やること・手順（3ステップ以内）・投稿のベストな時間帯
+・使うべきハッシュタグ
+・投稿のテンプレート文（コピペで使える例文）
+
+【1週間の投稿カレンダー】
+・月〜日で「何曜日に何を投稿するか」を具体的に
+
+■ リアル施策（店頭・対面・地域）
+【明日やること】
+【1週間以内にやること】
+
+■ 1週間後のセルフチェックリスト
+□ プロフィール文を修正したか？
+□ 今週○回投稿できたか？
+□ リアル施策を1つ実行したか？
+□ 来店数に変化はあったか？`;
+  }
+
+  function val(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+
+  function getPromptSlide() {
+    const b = val('business') || '〇〇';
+    return `ここまでの分析結果を、以下の6ページ構成のスライド用にまとめ直してください。
+各ページは見出し＋箇条書き3〜5個で、短く簡潔に。
+
+1ページ目：タイトル（${b}の集客改善プラン）
+2ページ目：ターゲット分析（理想のお客様像・行動パターン）
+3ページ目：SNS改善ポイント（プロフィール改善案・最適な投稿時間・ハッシュタグ）
+4ページ目：来店までの流れ（知る→気になる→行ってみる）
+5ページ目：具体的アクション（ネット施策・リアル施策）
+6ページ目：明日からのチェックリスト（すぐやること3つ）
+
+※ 長い説明は不要です。箇条書きで端的にまとめてください。`;
+  }
+
+  function updatePrompts() {
+    document.getElementById('promptText1').textContent = getPrompt1();
+    document.getElementById('promptText2').textContent = getPrompt2();
+    document.getElementById('promptTextSlide').textContent = getPromptSlide();
+  }
+
+  function showStep(n) {
+    currentStep = n;
+    steps.forEach((id, i) => {
+      document.getElementById(id).classList.toggle('active', i === n);
+    });
+    navItems.forEach((item, i) => {
+      item.classList.toggle('active', i === n);
+    });
+    // まとめステップ
+    document.getElementById('tomorrowBox').classList.toggle('active', n === 5);
+    document.getElementById('shareBtn').classList.toggle('active', n === 5);
+    document.getElementById('reflectionArea').style.display = (n === 5) ? 'block' : 'none';
+    updateProgress();
+    window.scrollTo(0, 0);
+  }
+
+  function updateProgress() {
+    const pct = Math.round((currentStep / (steps.length - 1)) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    const labels = ['お店の情報を入力', 'SNSコンセプトをチェック中', 'FELOに質問1を送信中', 'FELOに質問2を送信中', 'スライドを作ろう！', '共有＆発表！'];
+    document.getElementById('progressText').textContent = labels[currentStep];
+  }
+
+  // コピー
+  function copyPrompt(n, btn) {
+    let text;
+    if (n === 1) text = getPrompt1();
+    else if (n === 2) text = getPrompt2();
+    else if (n === 3) text = getPromptSlide();
+    else text = getPrompt2();
+
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'コピーしました！';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'このプロンプトをコピー';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'コピーしました！';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'このプロンプトをコピー';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // 自動保存
+  function autoSave() {
+    const data = {};
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      if (el.id) data[el.id] = el.value;
+    });
+    // チェックボックスの状態も保存
+    const checks = [];
+    document.querySelectorAll('.concept-check').forEach(cb => checks.push(cb.checked));
+    data._conceptChecks = checks;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const indicator = document.getElementById('saveIndicator');
+    indicator.classList.add('show');
+    setTimeout(() => indicator.classList.remove('show'), 1500);
+  }
+
+  // 復元
+  function restore() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    Object.entries(data).forEach(([id, value]) => {
+      if (id === '_conceptChecks') return;
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    });
+    // チェックボックスの復元
+    if (data._conceptChecks) {
+      const checks = document.querySelectorAll('.concept-check');
+      data._conceptChecks.forEach((checked, i) => {
+        if (checks[i]) checks[i].checked = checked;
+      });
+      updateScore();
+    }
+  }
+
+  // GAS WebアプリURL
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwpaomkpvJ3_4p2Zdh9onDnLAutVai5w_fSAyeYyjIEcttNFhXB-jN6LSkryugqLQAp/exec';
+
+  // スプレッドシートに共有
+  function shareToSheet() {
+    const btn = document.getElementById('shareBtn');
+    const status = document.getElementById('shareStatus');
+
+    // 必須チェック
+    if (!val('name')) {
+      status.className = 'share-status error';
+      status.textContent = 'お名前を入力してください';
+      return;
+    }
+
+    btn.textContent = '送信中...';
+    btn.disabled = true;
+
+    const payload = {
+      name: val('name'),
+      business: val('business'),
+      location: val('location'),
+      problem: val('problem'),
+      feloLink: val('feloLink'),
+      discovery: val('concept') + ' / ギャップ: ' + val('gap'),
+      tomorrow: val('tomorrow'),
+      session: '',
+      feloResponse: val('feloResponse'),
+      prompt1: getPrompt1(),
+      prompt2: getPrompt2(),
+      prompt3: '',
+      promptSlide: getPromptSlide()
+    };
+
+    fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(() => {
+      btn.textContent = '共有しました！';
+      btn.classList.add('sent');
+      status.className = 'share-status success';
+      status.textContent = '講師のスクリーンに表示されます。発表の準備をしてください！';
+    }).catch(err => {
+      btn.textContent = 'もう一度試す';
+      btn.disabled = false;
+      status.className = 'share-status error';
+      status.textContent = '送信に失敗しました。もう一度お試しください。';
+    });
+  }
+
+  // テキスト保存
+  function exportSheet() {
+    const lines = [
+      '=== 集客アクションシート ===',
+      `お名前: ${val('name')}`,
+      `業種: ${val('business')}`,
+      `場所: ${val('location')}`,
+      `一番の悩み: ${val('problem')}`,
+      '',
+      `FELOリンク: ${val('feloLink')}`,
+      `★ 明日やること: ${val('tomorrow')}`,
+    ].join('\n');
+    const blob = new Blob([lines], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `集客アクションシート_${val('name') || '未入力'}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // 初期化
+  restore();
+  updatePrompts();
+  updateProgress();
+</script>
+
+</body>
+</html>
