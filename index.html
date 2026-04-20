@@ -1317,7 +1317,7 @@ ${atm}
       location: val('location'),
       problem: val('problem'),
       feloLink: val('feloLink'),
-      discovery: val('concept') + ' / ギャップ: ' + val('gap'),
+      discovery: val('feloResponse') || (val('concept') + ' / ギャップ: ' + val('gap')),
       tomorrow: val('tomorrow'),
       session: '',
       feloResponse: val('feloResponse'),
