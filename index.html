@@ -1327,10 +1327,11 @@ ${atm}
       promptSlide: getPromptSlide()
     };
 
+    // GASにはno-cors + text/plainで送信（application/jsonはCORSプリフライトで拒否される）
     fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     }).then(() => {
       btn.textContent = '共有しました！';
